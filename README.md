@@ -23,12 +23,24 @@ Servidores no cluster possuem um agente de monitoramento que, através de certas
 - Servidor 2 publica nos tópicos "server2.service1" e "server2.service2"
 - Servidor 3 publica nos tópicos "server3.service1" e "server3.service2"
 
-Usaremos as seguintes métricas:
+Usaremos as seguintes métricas...
 
-- Uso de CPU 
-- Uso de memória
-- Tempo de resposta
-- Número de conexões ativas
+- Serviço Web:
+
+| Status   | CPU Usage | Memory Usage | Response Time   | Active Connections |
+|----------|-----------|--------------|-----------------|--------------------|
+| OK       | < 60%     | < 70%        | < 200 ms        | < 70%              | 
+| Warning  | 60% - 85% | 70% - 90%    | 200 ms - 500 ms | 70% - 90%          | 
+| Critical | > 85%     | > 90%        | > 500 ms        | > 90%              | 
+
+- Serviço de Banco de dados:
+
+| Status   | CPU Usage | Memory Usage | Response Time   | Active Connections |
+|----------|-----------|--------------|-----------------|--------------------|
+| OK       | < 50%     | < 60%        | < 100 ms        | < 60%              | 
+| Warning  | 50% - 75% | 60% - 80%    | 100 ms - 300 ms | 60% - 80%          | 
+| Critical | > 75%     | > 80%        | > 300 ms        | > 8   0%              | 
+
 
 A saída do tópico pode ser algo como:
 

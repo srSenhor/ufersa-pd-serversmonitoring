@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import br.edu.ufersa.pd.servermonitoring.entities.ServerInfo;
+import br.edu.ufersa.pd.servermonitoring.utils.ServerStatusWrapper;
 import br.edu.ufersa.pd.servermonitoring.utils.ServiceType;
 
 public class Server {
@@ -52,6 +53,7 @@ public class Server {
         } else {
             
             executor.scheduleWithFixedDelay(new SubCentralServerThread(), 0, 2, TimeUnit.SECONDS);
+            executor.scheduleWithFixedDelay(new ServiceOrderThread(), 10, 2, TimeUnit.SECONDS);
             executor.schedule(() -> {
                 
                 executor.shutdownNow();
@@ -63,21 +65,21 @@ public class Server {
 
 
 
-        ConcurrentMap<String, ServerInfo> map = null;
+        // ConcurrentMap<String, ServerInfo> map = null;
 
-        for (int i = 0; i < 100; i++) {
+        // for (int i = 0; i < 100; i++) {
 
-            try {
-				Thread.sleep(15000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+        //     try {
+		// 		Thread.sleep(15000);
+		// 	} catch (InterruptedException e) {
+		// 		e.printStackTrace();
+		// 	}
 
-            map = serverStatus.get();
+        //     map = serverStatus.get();
 
-            System.out.println(map.get(ServiceType.WEBSERVICE.name()));
-            System.out.println(map.get(ServiceType.DATABASESERVICE.name()));
-        }
+        //     System.out.println(map.get(ServiceType.WEBSERVICE.name()));
+        //     System.out.println(map.get(ServiceType.DATABASESERVICE.name()));
+        // }
         
     }
 

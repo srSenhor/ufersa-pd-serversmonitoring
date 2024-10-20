@@ -12,6 +12,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
 import br.edu.ufersa.pd.servermonitoring.entities.ServerInfo;
+import br.edu.ufersa.pd.servermonitoring.utils.ServerStatusWrapper;
 
 public class SubCentralServerThread implements Runnable {
 

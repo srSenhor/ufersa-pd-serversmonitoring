@@ -1,4 +1,4 @@
-package br.edu.ufersa.pd.servermonitoring.server;
+package br.edu.ufersa.pd.servermonitoring.utils;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

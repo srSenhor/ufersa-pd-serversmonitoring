@@ -8,6 +8,8 @@ import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.*;
 
+import br.edu.ufersa.pd.servermonitoring.utils.GUI;
+import br.edu.ufersa.pd.servermonitoring.utils.ServerStatusWrapper;
 import br.edu.ufersa.pd.servermonitoring.utils.ServiceType;
 
 public class MonitoringAgentThread implements Runnable {
@@ -35,6 +37,11 @@ public class MonitoringAgentThread implements Runnable {
     public void run() {
         
         factory.setHost("localhost");
+
+        GUI.clearScreen();
+
+        System.out.println("DEBUG: " + serverStatus.get(ServiceType.WEBSERVICE.name()));
+        System.out.println("DEBUG: " + serverStatus.get(ServiceType.DATABASESERVICE.name()));
 
         try (   Connection conn = factory.newConnection();
                 Channel channel = conn.createChannel()) {

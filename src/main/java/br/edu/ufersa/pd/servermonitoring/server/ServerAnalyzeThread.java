@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Random;
 
 import br.edu.ufersa.pd.servermonitoring.entities.ServerInfo;
+import br.edu.ufersa.pd.servermonitoring.utils.ServerStatusWrapper;
 import br.edu.ufersa.pd.servermonitoring.utils.ServiceType;
 import br.edu.ufersa.pd.servermonitoring.utils.Status;
 
@@ -16,75 +17,80 @@ public class ServerAnalyzeThread implements Runnable {
 		this.SERVER_NAME = serverName;
         this.serverStatus = ServerStatusWrapper.getInstance();
 	}
-    
-    @Override
-    public void run() {
+
+    private ServerInfo generateInfo(ServerInfo info, ServiceType type) {
         Random r = new Random();
         
-        float cpuUsage = r.nextFloat(5.0f);
-        float memoryUsage = r.nextFloat(5.0f);
-        int responseTime = r.nextInt(50);
-        float activeConnections = r.nextFloat(5.0f);
+        float cpuUsage = r.nextFloat(3.0f, 10.0f);
+        float memoryUsage = r.nextFloat(3.0f, 10.0f);
+        int responseTime = r.nextInt(20, 50);
+        float activeConnections = r.nextFloat(3.0f, 10.0f);
         
         cpuUsage = (r.nextBoolean() == true) ? cpuUsage : - cpuUsage;
         memoryUsage = (r.nextBoolean() == true) ? memoryUsage : - memoryUsage;
         responseTime = (r.nextBoolean() == true) ? responseTime : - responseTime;
         activeConnections = (r.nextBoolean() == true) ? activeConnections : - activeConnections;
         
-        ServerInfo dataService1 = new ServerInfo(LocalDateTime.now(), SERVER_NAME);
+        
+        info.setServiceType(type);
+        info.incrementCpuUsage(cpuUsage);
+        info.incrementMemoryUsage(memoryUsage);
+        info.incrementResponseTime(responseTime);
+        info.incrementActiveConnections(activeConnections);            
 
-        dataService1.incrementCpuUsage(cpuUsage);
-        dataService1.incrementMemoryUsage(memoryUsage);
-        dataService1.incrementResponseTime(responseTime);
-        dataService1.incrementActiveConnections(activeConnections);            
+        return info;
+    }
+    
+    @Override
+    public void run() {
 
-        if (dataService1.getCpuUsage() < 60.0f 
-        && dataService1.getMemoryUsage() < 70.0f 
-        && dataService1.getResponseTime() < 200 
-        && dataService1.getActiveConnections() < 70.0f) {
+        ServerInfo info = new ServerInfo(LocalDateTime.now(), SERVER_NAME);
+        info = generateInfo(info, ServiceType.WEBSERVICE);
+        
+        if (info.getCpuUsage() < 60.0f 
+        && info.getMemoryUsage() < 70.0f 
+        && info.getResponseTime() < 200 
+        && info.getActiveConnections() < 70.0f) {
 
-            dataService1.setStatus(Status.OK);
+            info.setStatus(Status.OK);
 
-        } else if (dataService1.getCpuUsage() < 85.0f 
-        && dataService1.getMemoryUsage() < 90.0f 
-        && dataService1.getResponseTime() < 500 
-        && dataService1.getActiveConnections() < 90.0f) {
+        } else if (info.getCpuUsage() < 85.0f 
+        && info.getMemoryUsage() < 90.0f 
+        && info.getResponseTime() < 500 
+        && info.getActiveConnections() < 90.0f) {
 
-            dataService1.setStatus(Status.WARNING);
+            info.setStatus(Status.WARNING);
 
         } else {
-            dataService1.setStatus(Status.CRITICAL);
+            info.setStatus(Status.CRITICAL);
         }
+
+        serverStatus.update(ServiceType.WEBSERVICE.name(), info);
 
         // ------------------------------------------------------
 
-        if (dataService1.getCpuUsage() < 50.0f 
-        && dataService1.getMemoryUsage() < 60.0f 
-        && dataService1.getResponseTime() < 100 
-        && dataService1.getActiveConnections() < 60.0f) {
+        info = new ServerInfo(LocalDateTime.now(), SERVER_NAME);
+        info = generateInfo(info, ServiceType.DATABASESERVICE);
 
-            dataService1.setStatus(Status.OK);
+        if (info.getCpuUsage() < 50.0f 
+        && info.getMemoryUsage() < 60.0f 
+        && info.getResponseTime() < 100 
+        && info.getActiveConnections() < 60.0f) {
 
-        } else if (dataService1.getCpuUsage() < 75.0f 
-        && dataService1.getMemoryUsage() < 80.0f 
-        && dataService1.getResponseTime() < 300 
-        && dataService1.getActiveConnections() < 80.0f) {
+            info.setStatus(Status.OK);
 
-            dataService1.setStatus(Status.WARNING);
+        } else if (info.getCpuUsage() < 75.0f 
+        && info.getMemoryUsage() < 80.0f 
+        && info.getResponseTime() < 300 
+        && info.getActiveConnections() < 80.0f) {
+
+            info.setStatus(Status.WARNING);
 
         } else {
-            dataService1.setStatus(Status.CRITICAL);
+            info.setStatus(Status.CRITICAL);
         }
 
-        // ------------------------------------------------------
-
-        dataService1.setServiceType(ServiceType.WEBSERVICE);
-        serverStatus.update(ServiceType.WEBSERVICE.name(), dataService1);
-
-        ServerInfo dataService2 = dataService1.clone();
-
-        dataService2.setServiceType(ServiceType.DATABASESERVICE);
-        serverStatus.update(ServiceType.DATABASESERVICE.name(), dataService2);
+        serverStatus.update(ServiceType.DATABASESERVICE.name(), info);
 
     }
 }

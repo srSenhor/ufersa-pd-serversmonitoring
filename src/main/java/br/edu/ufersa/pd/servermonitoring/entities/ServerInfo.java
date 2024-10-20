@@ -28,7 +28,7 @@ public class ServerInfo {
         fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
     }
     
-    public ServerInfo(LocalDateTime timestamp, ServiceType serviceType, Status status, String serverName,
+    private ServerInfo(LocalDateTime timestamp, ServiceType serviceType, Status status, String serverName,
             float cpuUsage, float memoryUsage, int responseTime, float activeConnections) {
         this.timestamp = timestamp;
         this.serviceType = serviceType;

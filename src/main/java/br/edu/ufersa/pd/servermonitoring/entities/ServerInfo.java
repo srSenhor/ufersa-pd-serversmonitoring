@@ -6,7 +6,7 @@ import br.edu.ufersa.pd.servermonitoring.utils.Status;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class ServiceData {
+public class ServerInfo {
 
     private LocalDateTime timestamp;
     private static DateTimeFormatter fmt;
@@ -19,9 +19,16 @@ public class ServiceData {
     private float activeConnections;
 
     
-
+    public ServerInfo() {
+        setStatus(Status.OK);
+        this.cpuUsage = 0.0f;
+        this.memoryUsage = 0.0f;
+        this.responseTime = 1;
+        this.activeConnections = 0.0f;
+        fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    }
     
-    public ServiceData(LocalDateTime timestamp, ServiceType serviceType, Status status, String serverName,
+    public ServerInfo(LocalDateTime timestamp, ServiceType serviceType, Status status, String serverName,
             float cpuUsage, float memoryUsage, int responseTime, float activeConnections) {
         this.timestamp = timestamp;
         this.serviceType = serviceType;
@@ -34,9 +41,8 @@ public class ServiceData {
         fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     }
 
-    public ServiceData(LocalDateTime timestamp, ServiceType serviceType, String serverName) {
+    public ServerInfo(LocalDateTime timestamp, String serverName) {
         setTimestamp(timestamp);
-        setServiceType(serviceType);
         setServerName(serverName);
         setStatus(Status.OK);
         this.cpuUsage = 0.0f;
@@ -157,7 +163,7 @@ public class ServiceData {
                 + "#";
     }
 
-    public ServiceData fromString(String input) {
+    public static ServerInfo fromString(String input) {
 
         String [] fields = input.split("/");
 
@@ -170,8 +176,13 @@ public class ServiceData {
         int responseTime = Integer.parseInt(fields[6]);
         float activeConnections = Float.parseFloat(fields[7]);
 
-        return new ServiceData(timestamp, serviceType, status, serverName, cpuUsage, memoryUsage, responseTime, activeConnections);
+        return new ServerInfo(timestamp, serviceType, status, serverName, cpuUsage, memoryUsage, responseTime, activeConnections);
 
+    }
+
+    @Override
+    public ServerInfo clone() {
+        return new ServerInfo(timestamp, serviceType, status, serverName, cpuUsage, memoryUsage, responseTime, activeConnections);
     }
 
     

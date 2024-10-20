@@ -1,100 +1,84 @@
 package br.edu.ufersa.pd.servermonitoring.server;
 
-import java.time.LocalDateTime;
-import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import br.edu.ufersa.pd.servermonitoring.entities.ServiceData;
+import br.edu.ufersa.pd.servermonitoring.entities.ServerInfo;
 import br.edu.ufersa.pd.servermonitoring.utils.ServiceType;
-import br.edu.ufersa.pd.servermonitoring.utils.Status;
 
 public class Server {
 
     private String name;
-    private ServiceType serviceType;
+    private ScheduledExecutorService executor;
+    private ServerStatusWrapper serverStatus;
+    
+    private final boolean IS_CENTRAL_SERVER;
+    private final int N_THREADS = 3;
 
-    public Server(String name, ServiceType serviceType) {
+    public Server(String name, boolean isCentralServer) {
+        this.IS_CENTRAL_SERVER = isCentralServer;
         this.name = name;
-        this.serviceType = serviceType;
+        this.executor = Executors.newScheduledThreadPool(N_THREADS);
+        this.serverStatus = ServerStatusWrapper.getInstance();
+        this.serverStatus.setServerName(name);
         this.init();
     }
 
+    public Server(String name) {
+        this.IS_CENTRAL_SERVER = false;
+        this.name = name;
+        this.executor = Executors.newScheduledThreadPool(N_THREADS);
+        this.serverStatus = ServerStatusWrapper.getInstance();
+        this.serverStatus.setServerName(name);
+        this.init();
+    }
 
     private void init() {
-        
-        Random r = new Random();
-        ServiceData data = new ServiceData(LocalDateTime.now(), serviceType, name);
+
+        serverStatus.update(ServiceType.WEBSERVICE.name(), new ServerInfo());
+        serverStatus.update(ServiceType.DATABASESERVICE.name(), new ServerInfo());
+
+        if (!IS_CENTRAL_SERVER) {
+            executor.scheduleWithFixedDelay(new ServerAnalyzeThread(name, serverStatus), 0, 5, TimeUnit.SECONDS);
+            executor.scheduleWithFixedDelay(new MonitoringAgentThread(), 10, 1, TimeUnit.SECONDS);
+            executor.schedule(() -> {
+    
+                executor.shutdownNow();
+    
+            }, 1, TimeUnit.DAYS);
+            
+        } else {
+            
+            executor.scheduleWithFixedDelay(new SubCentralServerThread(), 0, 2, TimeUnit.SECONDS);
+            executor.schedule(() -> {
+                
+                executor.shutdownNow();
+                
+            }, 1, TimeUnit.DAYS);
+
+            System.out.println("=========== Central Server ===========");
+        }
+
+
+
+        ConcurrentMap<String, ServerInfo> map = null;
 
         for (int i = 0; i < 100; i++) {
-            float cpuUsage = r.nextFloat(5.0f);
-            float memoryUsage = r.nextFloat(5.0f);
-            int responseTime = r.nextInt(50);
-            float activeConnections = r.nextFloat(5.0f);
-    
-    
-            cpuUsage = (r.nextBoolean() == true) ? cpuUsage : - cpuUsage;
-            memoryUsage = (r.nextBoolean() == true) ? memoryUsage : - memoryUsage;
-            responseTime = (r.nextBoolean() == true) ? responseTime : - responseTime;
-            activeConnections = (r.nextBoolean() == true) ? activeConnections : - activeConnections;
-    
-            data.incrementCpuUsage(cpuUsage);
-            data.incrementMemoryUsage(memoryUsage);
-            data.incrementResponseTime(responseTime);
-            data.incrementActiveConnections(activeConnections);            
+
+            try {
+				Thread.sleep(15000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+            map = serverStatus.get();
+
+            System.out.println(map.get(ServiceType.WEBSERVICE.name()));
+            System.out.println(map.get(ServiceType.DATABASESERVICE.name()));
         }
-
-
-
-        switch (serviceType) {
-            case WEBSERVICE:
-
-                if (data.getCpuUsage() < 60.0f 
-                && data.getMemoryUsage() < 70.0f 
-                && data.getResponseTime() < 200 
-                && data.getActiveConnections() < 70.0f) {
-
-                    data.setStatus(Status.OK);
-
-                } else if (data.getCpuUsage() < 85.0f 
-                && data.getMemoryUsage() < 90.0f 
-                && data.getResponseTime() < 500 
-                && data.getActiveConnections() < 90.0f) {
-
-                    data.setStatus(Status.WARNING);
-
-                } else {
-                    data.setStatus(Status.CRITICAL);
-                }
-                
-                break;
-            case DATABASESERVICE:
-
-                if (data.getCpuUsage() < 50.0f 
-                && data.getMemoryUsage() < 60.0f 
-                && data.getResponseTime() < 100 
-                && data.getActiveConnections() < 60.0f) {
-
-                    data.setStatus(Status.OK);
-
-                } else if (data.getCpuUsage() < 75.0f 
-                && data.getMemoryUsage() < 80.0f 
-                && data.getResponseTime() < 300 
-                && data.getActiveConnections() < 80.0f) {
-
-                    data.setStatus(Status.WARNING);
-
-                } else {
-                    data.setStatus(Status.CRITICAL);
-                }
-                
-                break;
-            default:
-                break;
-        }
-
-        System.out.println(data.toString());
-
+        
     }
-    
-    
 
 }

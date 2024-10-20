@@ -35,19 +35,19 @@ public class GUI {
                 System.out.println(BG_BLUE + WHITE + "[=================== " + info.getServerName() + " ===================]" + RESET);
                 printInfo(info);
                 System.out.println("Status: " + BLUE + status + RESET);
-                System.out.println(BG_BLUE + WHITE + "[==========================================================]" + RESET);
+                System.out.println(BG_BLUE + WHITE + "[================================================]" + RESET);
                 break;
             case WARNING:
                 System.out.println(BG_YELLOW + WHITE + "[=================== " + info.getServerName() + " ===================]" + RESET);
                 printInfo(info);
                 System.out.println("Status: " + YELLOW + status + RESET);
-                System.out.println(BG_YELLOW + WHITE + "[==========================================================]" + RESET);
+                System.out.println(BG_YELLOW + WHITE + "[==============================================]" + RESET);
                 break;
             case CRITICAL:
                 System.out.println(BG_RED    + WHITE + "[=================== " + info.getServerName() + " ===================]" + RESET);
                 printInfo(info);
                 System.out.println("Status: " + RED +  status + RESET);
-                System.out.println(BG_RED + WHITE + "[==========================================================]" + RESET);
+                System.out.println(BG_RED + WHITE + "[==================================================]" + RESET);
                 break;
         
             default:

@@ -3,6 +3,7 @@ package br.edu.ufersa.pd.servermonitoring.server;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.BuiltinExchangeType;
@@ -13,6 +14,7 @@ import com.rabbitmq.client.DeliverCallback;
 
 import br.edu.ufersa.pd.servermonitoring.entities.ServerInfo;
 import br.edu.ufersa.pd.servermonitoring.utils.ServerStatusWrapper;
+import br.edu.ufersa.pd.servermonitoring.utils.ServiceType;
 
 public class SubCentralServerThread implements Runnable {
 
@@ -23,8 +25,9 @@ public class SubCentralServerThread implements Runnable {
     private Channel channel;
     private String queueName;
     private ServerStatusWrapper serverStatus;
+    private ConcurrentMap<String, ServerInfo> map;
 
-    public SubCentralServerThread() {
+    public SubCentralServerThread(ConcurrentMap<String, ServerInfo> map) {
         this.EXCHANGE = "monitoring_agency";
         this.ROUTINGKEYS = Arrays.asList(
             "*.service1",
@@ -33,6 +36,7 @@ public class SubCentralServerThread implements Runnable {
         );
         this.factory = new ConnectionFactory();
         this.serverStatus = ServerStatusWrapper.getInstance();
+        this.map = map;
         this.initialize();
     }
 
@@ -70,6 +74,24 @@ public class SubCentralServerThread implements Runnable {
             channel.basicConsume(queueName, true, deliverCallback, (consumerTag) -> {});
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        switch (serverStatus.getServerName()) {
+            case "Server 1":
+                map.put("Server 1 (WEBSERVICE)", serverStatus.get(ServiceType.WEBSERVICE.name()));
+                map.put("Server 1 (DATABASESERVICE)", serverStatus.get(ServiceType.DATABASESERVICE.name()));
+                break;
+            case "Server 2":
+                map.put("Server 2 (WEBSERVICE)", serverStatus.get(ServiceType.WEBSERVICE.name()));
+                map.put("Server 2 (DATABASESERVICE)", serverStatus.get(ServiceType.DATABASESERVICE.name()));
+                break;
+            case "Server 3":
+                map.put("Server 3 (WEBSERVICE)", serverStatus.get(ServiceType.WEBSERVICE.name()));
+                map.put("Server 3 (DATABASESERVICE)", serverStatus.get(ServiceType.DATABASESERVICE.name()));
+                break;
+        
+            default:
+                break;
         }
 
     }

@@ -15,6 +15,7 @@ public class PrintServerThread implements Runnable {
     @Override
     public void run() {
         GUI.clearScreen();
+        System.out.println("<=<=<=<=<=<=<=<=<=<=<=<=< Server Analysis >=>=>=>=>=>=>=>=>=>=>=>=>");
         GUI.customServerStatus(serverStatus.get(ServiceType.WEBSERVICE.name()));
         GUI.customServerStatus(serverStatus.get(ServiceType.DATABASESERVICE.name()));
     }

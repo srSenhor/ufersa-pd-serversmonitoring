@@ -1,10 +1,13 @@
 package br.edu.ufersa.pd.servermonitoring.server;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import br.edu.ufersa.pd.servermonitoring.entities.ServerInfo;
+import br.edu.ufersa.pd.servermonitoring.utils.GUI;
 import br.edu.ufersa.pd.servermonitoring.utils.ServerStatusWrapper;
 import br.edu.ufersa.pd.servermonitoring.utils.ServiceType;
 
@@ -13,6 +16,7 @@ public class Server {
     private String name;
     private ScheduledExecutorService executor;
     private ServerStatusWrapper serverStatus;
+    private ConcurrentMap<String, ServerInfo> map;
     
     private final boolean IS_CENTRAL_SERVER;
 
@@ -21,6 +25,7 @@ public class Server {
         this.name = name;
         this.serverStatus = ServerStatusWrapper.getInstance();
         this.serverStatus.setServerName(name);
+        this.map = new ConcurrentHashMap<>();
         this.init();
     }
 
@@ -29,6 +34,7 @@ public class Server {
         this.name = name;
         this.serverStatus = ServerStatusWrapper.getInstance();
         this.serverStatus.setServerName(name);
+        this.map = new ConcurrentHashMap<>();
         this.init();
     }
 
@@ -40,8 +46,8 @@ public class Server {
         if (!IS_CENTRAL_SERVER) {
             executor = Executors.newScheduledThreadPool(2);
 
-            executor.scheduleWithFixedDelay(new ServerAnalyzeThread(name, serverStatus), 0, 5, TimeUnit.SECONDS);
-            executor.scheduleWithFixedDelay(new MonitoringAgentThread(), 10, 1, TimeUnit.SECONDS);
+            executor.scheduleWithFixedDelay(new ServerAnalyzeThread(name, serverStatus), 0, 1, TimeUnit.SECONDS);
+            executor.scheduleWithFixedDelay(new MonitoringAgentThread(), 3, 6, TimeUnit.SECONDS);
             executor.schedule(() -> {
     
                 executor.shutdownNow();
@@ -51,9 +57,9 @@ public class Server {
         } else {
             executor = Executors.newScheduledThreadPool(3);
             
-            executor.scheduleWithFixedDelay(new SubCentralServerThread(), 0, 2, TimeUnit.SECONDS);
+            executor.scheduleWithFixedDelay(new SubCentralServerThread(map), 0, 1, TimeUnit.SECONDS);
             executor.scheduleWithFixedDelay(new ServiceOrderThread(), 10, 2, TimeUnit.SECONDS);
-            executor.scheduleWithFixedDelay(new PrintServerThread(), 0, 1, TimeUnit.SECONDS);
+            executor.scheduleWithFixedDelay(new PrintServerThread(), 0, 2, TimeUnit.SECONDS);
             executor.schedule(() -> {
                 
                 executor.shutdownNow();

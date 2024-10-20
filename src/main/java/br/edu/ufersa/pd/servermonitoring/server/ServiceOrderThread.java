@@ -10,8 +10,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 import br.edu.ufersa.pd.servermonitoring.utils.ServerStatusWrapper;
-import br.edu.ufersa.pd.servermonitoring.utils.ServiceType;
-import br.edu.ufersa.pd.servermonitoring.utils.Status;
 
 public class ServiceOrderThread implements Runnable {
 

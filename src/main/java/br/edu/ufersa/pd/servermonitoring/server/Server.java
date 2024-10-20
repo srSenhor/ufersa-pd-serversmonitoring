@@ -1,6 +1,5 @@
 package br.edu.ufersa.pd.servermonitoring.server;
 
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,12 +15,10 @@ public class Server {
     private ServerStatusWrapper serverStatus;
     
     private final boolean IS_CENTRAL_SERVER;
-    private final int N_THREADS = 3;
 
     public Server(String name, boolean isCentralServer) {
         this.IS_CENTRAL_SERVER = isCentralServer;
         this.name = name;
-        this.executor = Executors.newScheduledThreadPool(N_THREADS);
         this.serverStatus = ServerStatusWrapper.getInstance();
         this.serverStatus.setServerName(name);
         this.init();
@@ -30,7 +27,6 @@ public class Server {
     public Server(String name) {
         this.IS_CENTRAL_SERVER = false;
         this.name = name;
-        this.executor = Executors.newScheduledThreadPool(N_THREADS);
         this.serverStatus = ServerStatusWrapper.getInstance();
         this.serverStatus.setServerName(name);
         this.init();
@@ -42,6 +38,8 @@ public class Server {
         serverStatus.update(ServiceType.DATABASESERVICE.name(), new ServerInfo());
 
         if (!IS_CENTRAL_SERVER) {
+            executor = Executors.newScheduledThreadPool(2);
+
             executor.scheduleWithFixedDelay(new ServerAnalyzeThread(name, serverStatus), 0, 5, TimeUnit.SECONDS);
             executor.scheduleWithFixedDelay(new MonitoringAgentThread(), 10, 1, TimeUnit.SECONDS);
             executor.schedule(() -> {
@@ -51,9 +49,11 @@ public class Server {
             }, 1, TimeUnit.DAYS);
             
         } else {
+            executor = Executors.newScheduledThreadPool(3);
             
             executor.scheduleWithFixedDelay(new SubCentralServerThread(), 0, 2, TimeUnit.SECONDS);
             executor.scheduleWithFixedDelay(new ServiceOrderThread(), 10, 2, TimeUnit.SECONDS);
+            executor.scheduleWithFixedDelay(new PrintServerThread(), 0, 1, TimeUnit.SECONDS);
             executor.schedule(() -> {
                 
                 executor.shutdownNow();
@@ -62,24 +62,6 @@ public class Server {
 
             System.out.println("=========== Central Server ===========");
         }
-
-
-
-        // ConcurrentMap<String, ServerInfo> map = null;
-
-        // for (int i = 0; i < 100; i++) {
-
-        //     try {
-		// 		Thread.sleep(15000);
-		// 	} catch (InterruptedException e) {
-		// 		e.printStackTrace();
-		// 	}
-
-        //     map = serverStatus.get();
-
-        //     System.out.println(map.get(ServiceType.WEBSERVICE.name()));
-        //     System.out.println(map.get(ServiceType.DATABASESERVICE.name()));
-        // }
         
     }
 

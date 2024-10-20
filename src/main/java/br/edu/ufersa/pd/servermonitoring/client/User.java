@@ -27,7 +27,7 @@ public class User {
 
         factory.setHost("localhost");
         try {
-            
+
             Connection conn = factory.newConnection();
             Channel channel = conn.createChannel();
 

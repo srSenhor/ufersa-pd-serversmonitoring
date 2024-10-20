@@ -7,7 +7,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import br.edu.ufersa.pd.servermonitoring.entities.ServerInfo;
-import br.edu.ufersa.pd.servermonitoring.utils.GUI;
 import br.edu.ufersa.pd.servermonitoring.utils.ServerStatusWrapper;
 import br.edu.ufersa.pd.servermonitoring.utils.ServiceType;
 

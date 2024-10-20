@@ -2,7 +2,6 @@ package br.edu.ufersa.pd.servermonitoring.server;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
 
@@ -19,7 +18,6 @@ import br.edu.ufersa.pd.servermonitoring.utils.ServiceType;
 public class SubCentralServerThread implements Runnable {
 
     private final String EXCHANGE;
-    private final List<String> ROUTINGKEYS;
     private final ConnectionFactory factory;
     private Connection conn;
     private Channel channel;
@@ -29,7 +27,7 @@ public class SubCentralServerThread implements Runnable {
 
     public SubCentralServerThread(ConcurrentMap<String, ServerInfo> map) {
         this.EXCHANGE = "monitoring_agency";
-        this.ROUTINGKEYS = Arrays.asList(
+        Arrays.asList(
             "*.service1",
             "*.service2"
             // "#"

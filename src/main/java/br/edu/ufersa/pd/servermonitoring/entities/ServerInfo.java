@@ -18,13 +18,17 @@ public class ServerInfo {
     private int responseTime;
     private float activeConnections;
 
+    // private final float DEBUG_INCREMENT = 0.0f; // For OK
+    private final float DEBUG_INCREMENT = 50.0f; // For WARNING
+    // private final float DEBUG_INCREMENT = 90.0f; // For CRITICAL
+
     
     public ServerInfo() {
         setStatus(Status.OK);
-        this.cpuUsage = 0.0f;
-        this.memoryUsage = 0.0f;
+        this.cpuUsage = DEBUG_INCREMENT;
+        this.memoryUsage = DEBUG_INCREMENT;
         this.responseTime = 1;
-        this.activeConnections = 0.0f;
+        this.activeConnections = DEBUG_INCREMENT;
         fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
     }
     
@@ -45,10 +49,10 @@ public class ServerInfo {
         setTimestamp(timestamp);
         setServerName(serverName);
         setStatus(Status.OK);
-        this.cpuUsage = 0.0f;
-        this.memoryUsage = 0.0f;
+        this.cpuUsage = DEBUG_INCREMENT;
+        this.memoryUsage = DEBUG_INCREMENT;
         this.responseTime = 1;
-        this.activeConnections = 0.0f;
+        this.activeConnections = DEBUG_INCREMENT;
         fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     }
 

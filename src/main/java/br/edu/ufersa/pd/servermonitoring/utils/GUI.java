@@ -9,6 +9,7 @@ public class GUI {
     private static final String RED = "\u001B[31m";
     private static final String YELLOW = "\u001B[33m";
     private static final String BLUE = "\u001B[34m";
+    private static final String PURPLE = "\u001B[35m";
     private static final String WHITE = "\u001B[37m";
 
     private static final String BG_BLACK = "\u001B[40m";
@@ -17,7 +18,7 @@ public class GUI {
     private static final String BG_BLUE = "\u001B[44m";
     private static final String BG_WHITE = "\u001B[47m";
 
-    public static final String BOLD = "\u001B[1m"; 
+    private static final String BOLD = "\u001B[1m"; 
 
     public static void dummyTest() {
         System.out.println(BG_RED + WHITE + "[=================== Server 1 ===================]" + RESET);
@@ -34,19 +35,19 @@ public class GUI {
             case OK:
                 System.out.println(BG_BLUE + WHITE + "[=================== " + info.getServerName() + " ===================]" + RESET);
                 printInfo(info);
-                System.out.println("Status: " + BLUE + status + RESET);
+                System.out.println(printStatus(status));
                 System.out.println(BG_BLUE + WHITE + "[================================================]" + RESET);
                 break;
             case WARNING:
                 System.out.println(BG_YELLOW + WHITE + "[=================== " + info.getServerName() + " ===================]" + RESET);
                 printInfo(info);
-                System.out.println("Status: " + YELLOW + status + RESET);
+                System.out.println(printStatus(status));
                 System.out.println(BG_YELLOW + WHITE + "[==============================================]" + RESET);
                 break;
             case CRITICAL:
                 System.out.println(BG_RED    + WHITE + "[=================== " + info.getServerName() + " ===================]" + RESET);
                 printInfo(info);
-                System.out.println("Status: " + RED +  status + RESET);
+                System.out.println(printStatus(status));
                 System.out.println(BG_RED + WHITE + "[==================================================]" + RESET);
                 break;
         
@@ -55,6 +56,34 @@ public class GUI {
         }
 
         System.out.println();
+    }
+
+    public static String customServiceOrder(ServerInfo info, String problem, String actionRequired) {
+        StringBuilder response = new StringBuilder();
+        
+        response.append(BG_BLACK + WHITE + "*->             Service order             <-*" + RESET + "\n");
+        response.append(printPipe() + "Timestamp: " + info.getTimestamp() + RESET + "\n");
+        response.append(printPipe() + "Server: " + info.getServerName() + RESET + "\n");
+        response.append(printPipe() + "Service: " + info.getServiceType() + RESET + "\n");
+        response.append(printPipe() + printStatus(info.getStatus()) + "\n"); 
+        response.append(printPipe() + "Problem: " + problem + RESET + "\n");
+        response.append(printPipe() + "Action Required: " + actionRequired + RESET + "\n");
+        response.append(BG_BLACK + WHITE + "*->                                       <-*" + RESET + "\n");        
+
+        return response.toString();
+    }
+
+    private static String printStatus(Status status) {
+        return switch (status) {
+            case OK         -> ("Status: " + BOLD + BLUE + status + RESET);
+            case WARNING    -> ("Status: " + BOLD + YELLOW + status + RESET);
+            case CRITICAL   -> ("Status: " + BOLD + RED +  status + RESET);
+            default         -> ("Status: " + BOLD + PURPLE + "undefined" + RESET);
+        };
+    }
+
+    private static String printPipe() {
+        return BG_WHITE + BLACK + "|" + RESET;
     }
 
     private static void printInfo(ServerInfo info) {

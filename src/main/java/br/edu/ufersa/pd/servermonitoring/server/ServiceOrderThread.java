@@ -9,7 +9,8 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
-import br.edu.ufersa.pd.servermonitoring.utils.ServerStatusWrapper;
+import br.edu.ufersa.pd.servermonitoring.entities.ServerInfo;
+import br.edu.ufersa.pd.servermonitoring.utils.*;
 
 public class ServiceOrderThread implements Runnable {
 
@@ -25,6 +26,71 @@ public class ServiceOrderThread implements Runnable {
         this.serverStatus = ServerStatusWrapper.getInstance();
     }
 
+    private String selectAction(Status status) {
+        return switch(status) {
+            case WARNING -> "redirect users to another server";
+            case CRITICAL -> "check and restart server";
+            default -> "undefined";
+        };
+    }
+
+    private String buildProblem(ServerInfo info) {
+        return getProblem(info) + detailProblem(info);
+    }
+
+    private String detailProblem(ServerInfo info) {
+
+        Status status = info.getStatus();
+
+        return switch(status) {
+            case WARNING -> "server is congested";
+            case CRITICAL -> "server is not responding";
+            default -> "undefined";
+        };
+    }
+
+    private String getProblem(ServerInfo info) {
+
+        StringBuilder problem = new StringBuilder();
+        String temp = "";
+        float value = 0.0f;
+
+        switch (info.getServiceType()) {
+            case WEBSERVICE:
+                temp = ((value = info.getCpuUsage()) < 85.0f) ? "CPU Usage reach " + value + "%, " : "";
+                problem.append(temp);
+
+                temp = ((value = info.getMemoryUsage()) < 90.0f) ? "Memory Usage reach " + value + "%, " : "";
+                problem.append(temp);
+                
+                temp = ((value = info.getResponseTime()) < 500) ? "Response Time " + value + "ms, " : "";
+                problem.append(temp);
+                
+                temp = ((value = info.getActiveConnections()) < 90.0f) ? "Active Connections (capacity) reach" + value + "%, " : "";
+                problem.append(temp);
+                break;
+            case DATABASESERVICE:
+                temp = ((value = info.getCpuUsage()) < 75.0f) ? "CPU Usage reach" + value + "%, " : "";
+                problem.append(temp);
+
+                temp = ((value = info.getMemoryUsage()) < 80.0f) ? "Memory Usage reach " + value + "%, " : "";
+                problem.append(temp);
+                
+                temp = ((value = info.getResponseTime()) < 300) ? "Response Time " + value + "ms, " : "";
+                problem.append(temp);
+                
+                temp = ((value = info.getActiveConnections()) < 80.0f) ? "Active Connections (capacity) reach" + value + "%, " : "";
+                problem.append(temp);
+                break;
+        
+            default:
+                break;
+        }
+        
+        return problem.toString();
+
+    }
+
     @Override
     public void run() {
         factory.setHost("localhost");
@@ -36,7 +102,7 @@ public class ServiceOrderThread implements Runnable {
 
             serverStatus.get().values().stream().forEach(sample -> {
 
-                String message = sample.toString();
+                String message = GUI.customServiceOrder(sample, buildProblem(sample), selectAction(sample.getStatus()));
 
                 switch (sample.getStatus()) {
                     case WARNING:
